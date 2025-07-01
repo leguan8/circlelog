@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>圆与宙 Circlelog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/leaflet/1.9.4/leaflet.css" />
+  <link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #f7f7f7;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .title {
+      margin: 16px;
+      font-size: 24px;
+      text-align: center;
+    }
+    .cont {
+      margin: 16px;
+      font-size: 16px;
+      text-align: center;
+    }
+    .cont1 {
+      margin: 16px;
+      font-size: 12px;
+    }
+    #map-container {
+      width: 95%;
+      max-width: 800px;
+      height: 70vh;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 0 12px rgba(0,0,0,0.2);
+     margin-bottom: 20px;
+    }
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+    .leaflet-popup-content img {
+      width: 100%;
+      border-radius: 6px;
+      margin-top: 6px;
+    }
+    .leaflet-popup-content strong {
+      font-size: 16px;
+    }
+    .history, .random-line {
+      margin-top: 8px;
+      padding-top: 6px;
+      border-top: 1px solid #ddd;
+      font-size: 13px;
+      color: #555;
+    }
+   #timeline {
+  display: flex;
+  flex-direction: column; /* 年月竖排 */
+  overflow-y: auto;
+  max-height: 300px;
+  gap: 12px;
+  padding: 6px;
+ text-aling:center;
+}
+
+  .month-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+  .day-buttons {
+  display: flex;
+  flex-direction: row; /* 日期横排 */
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 4px;
+  padding: 4px 0;
+}
+    .month-group {
+      border-left: 2px solid #ccc;
+      padding-left: 8px;
+      margin-right: 12px;
+    }
+    .month-label {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .date-button {
+       display: inline-block;
+       margin-right: 4px;
+       margin-bottom: 0;
+      padding: 3px 6px;
+      border-radius: 4px;
+      background: #eee;
+      border: none;
+      cursor: pointer;
+    }
+    .date-button.active {
+      background: #007bff;
+      color: white;
+    }
+    #random-btn {
+      margin: 8px;
+      padding: 6px 14px;
+      font-size: 14px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="title">《圈记 Circle Diary》——在纸上画圈，在心中录音</div><div  class="cont">"一笔一圈，是一次时间的震荡，是一个世界的快照。"</div><div  class="cont1">每一张卡片上的同心圆，看似简单重复，却如水面上的波纹，在时间轴上无限展开。它既是“当下”的记录，也是“永恒”的象征。这些圆不是画出来的，它们是在那个时间、那个地点，被唤出来的。</div>
+<div  class="cont">“当我画第一个圆，我在画它；当我画第一百个圆，它在画我。”</div><div  class="cont1">重复地画圆是一种仪式，也是一种“精神扫描”。它让你的个体意志短暂地让位于宇宙秩序，使你成为通道，而非操控者。这是一种“去我化”的艺术实践。</div>
+  <button id="random-btn" onclick="jumpToRandom()">🎲 随机跳转一幅圈记</button>
+  <div id="timeline">还可以选择一个你感兴趣的日期，看看我画了什么
+  <div style="margin-bottom: 8px;" >
+    <label>年份：</label>
+    <select id="year-select"></select>
+    <label style="margin-left:12px;">月份：</label>
+    <select id="month-select"></select>
+  </div>
+  <div id="day-buttons" class="day-buttons"></div>
+</div>
+
+  <div id="map-container"><div id="map"></div></div>
+
+  <script src="https://cdnjs.loli.net/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+  <script src="https://cdnjs.loli.net/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
+
+  <script>
+    let allMarkers = [], markerMap = {}, stories = {}, activeCoord = "";
+
+    const map = L.map("map").setView([39.92, 116.38], 13);
+    L.tileLayer("https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=Kraj4sMruVnY2JOZ3xff", {
+      attribution: "© MapTiler & OpenStreetMap contributors", tileSize: 512, zoomOffset: -1
+    }).addTo(map);
+
+    // 加载作品
+    fetch("data/artworks.json").then(r => r.json()).then(data => {
+      const clusterGroup = L.markerClusterGroup();
+      const byMonth = {};
+      data.forEach(work => {
+        const coordKey = work.coordinates.join(",");
+        const date = work.time || "未知";
+        const [year, month, day] = date.split("-");
+        const yyyymm = `${year}-${month}`;
+        if (!byMonth[yyyymm]) byMonth[yyyymm] = [];
+        byMonth[yyyymm].push({ ...work, coordKey });
+
+        const html = generatePopup(work, coordKey);
+        const marker = L.marker(work.coordinates).bindPopup(html);
+        marker.on("popupopen", () => {
+          activeCoord = coordKey;
+          highlightTimeline(coordKey);
+          Fancybox.bind("[data-fancybox]", { hideScrollbar: false });
+          loadHistory(work.time, coordKey);
+          showRandomLine(work.weather || "clear", coordKey);
+        });
+        allMarkers.push({ marker, coords: work.coordinates });
+        markerMap[coordKey] = marker;
+        clusterGroup.addLayer(marker);
+      });
+      map.addLayer(clusterGroup);
+      buildTimeline(byMonth);
+    });
+
+    // 加载随机句子
+    fetch("data/stories.json").then(r => r.json()).then(j => stories = j);
+
+    function generatePopup(work, coordKey) {
+      return `
+        <div>
+          <strong>${work.title || "无标题"}</strong><br/>
+          <a data-fancybox="gallery-${coordKey}" href="${work.image}" data-caption="${work.title}">
+            <img src="${work.image}" alt="作品图" />
+          </a>
+          <div><small>时间：${work.time || "未知"} ｜ 天气：${work.weather || "未知"}</small></div>
+          <p>${work.notes || ""}</p>
+          <div class="random-line" id="line-${coordKey}">圈记 · 记录着每个瞬间的光影。</div>
+
+
+        </div>
+      `;
+    }
+
+    function loadHistory(dateStr, coordKey) {
+      if (!dateStr) return;
+      const [_, m, d] = dateStr.split("-");
+      fetch(`https://zh.wikipedia.org/api/rest_v1/feed/onthisday/events/${parseInt(m)}/${parseInt(d)}`)
+        .then(r => r.json())
+        .then(j => {
+          const html = (j.events || []).slice(0, 5).map(e => `<div>· ${e.text}</div>`).join("") || "暂无记录";
+          document.getElementById("history-" + coordKey).innerHTML = `<strong>📜 历史上的今天：</strong><br/>` + html;
+        })
+        .catch(() => {
+          document.getElementById("history-" + coordKey).innerHTML = "❌ 获取失败";
+        });
+    }
+
+    function showRandomLine(weather, coordKey) {
+      const lines = stories[weather] || stories["clear"] || [];
+      const text = lines[Math.floor(Math.random() * lines.length)] || "";
+      document.getElementById("line-" + coordKey).innerText = text;
+    }
+
+
+
+function buildTimeline(grouped) {
+  const yearSelect = document.getElementById("year-select");
+  const monthSelect = document.getElementById("month-select");
+  const dayButtons = document.getElementById("day-buttons");
+  const yearMap = {};
+
+  // 整理成 year -> month -> works 的结构
+  Object.entries(grouped).forEach(([ym, works]) => {
+    const [y, m] = ym.split("-");
+    if (!yearMap[y]) yearMap[y] = {};
+    yearMap[y][m] = works;
+  });
+
+  const years = Object.keys(yearMap).sort().reverse();
+  years.forEach(y => {
+    const opt = document.createElement("option");
+    opt.value = y;
+    opt.text = y;
+    yearSelect.appendChild(opt);
+  });
+
+  yearSelect.onchange = () => {
+    const y = yearSelect.value;
+    monthSelect.innerHTML = "";
+    Object.keys(yearMap[y] || {}).sort().forEach(m => {
+      const opt = document.createElement("option");
+      opt.value = m;
+      opt.text = m;
+      monthSelect.appendChild(opt);
+    });
+    monthSelect.onchange(); // 触发首次加载
+  };
+
+  monthSelect.onchange = () => {
+    const y = yearSelect.value;
+    const m = monthSelect.value;
+    const works = (yearMap[y] && yearMap[y][m]) || [];
+    dayButtons.innerHTML = "";
+    works.forEach(w => {
+      const btn = document.createElement("button");
+      btn.className = "date-button";
+      btn.textContent = w.time.split("-")[2];
+      btn.onclick = () => {
+        map.setView(w.coordinates, 16);
+        markerMap[w.coordKey].openPopup();
+      };
+      btn.dataset.coord = w.coordKey;
+      dayButtons.appendChild(btn);
+    });
+  };
+
+  // 初始化默认选择
+  if (years.length > 0) {
+    yearSelect.value = years[0];
+    yearSelect.onchange();
+  }
+}
+
+    function highlightTimeline(coord) {
+      document.querySelectorAll(".date-button").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.coord === coord);
+      });
+    }
+
+    function jumpToRandom() {
+      if (!allMarkers.length) return;
+      const { marker, coords } = allMarkers[Math.floor(Math.random() * allMarkers.length)];
+      map.setView(coords, 16);
+      marker.openPopup();
+    }
+  </script>
+</body>
+</html>
