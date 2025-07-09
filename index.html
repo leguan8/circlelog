@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -9,81 +10,18 @@
   <link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />
   <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      background: #f7f7f7;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .title {
-      margin: 16px;
-      font-size: 24px;
-      text-align: center;
-    }
-    .cont {
-      margin: 16px;
-      font-size: 16px;
-      text-align: center;
-    }
-    #map-container {
-      width: 95%;
-      max-width: 800px;
-      height: 70vh;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 0 12px rgba(0,0,0,0.2);
-      margin-bottom: 20px;
-    }
-    #map {
-      width: 100%;
-      height: 100%;
-    }
-    .leaflet-popup-content img {
-      width: 100%;
-      border-radius: 6px;
-      margin-top: 6px;
-    }
-    .leaflet-popup-content strong {
-      font-size: 16px;
-    }
-    #timeline {
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-      max-height: 300px;
-      gap: 12px;
-      padding: 6px;
-      text-align: center;
-    }
-    .day-buttons {
-      display: flex;
-      overflow-x: auto;
-      gap: 4px;
-      padding: 4px 0;
-    }
-    .date-button {
-      padding: 3px 6px;
-      border-radius: 4px;
-      background: #eee;
-      border: none;
-      cursor: pointer;
-    }
-    .date-button.active {
-      background: #007bff;
-      color: white;
-    }
-    #random-btn {
-      margin: 8px;
-      padding: 6px 14px;
-      font-size: 14px;
-      background: #007bff;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+    body { margin: 0; font-family: sans-serif; background: #f7f7f7; display: flex; flex-direction: column; align-items: center; }
+    .title { margin: 16px; font-size: 24px; text-align: center; }
+    .cont { margin: 16px; font-size: 16px; text-align: center; }
+    #map-container { width: 95%; max-width: 800px; height: 70vh; border-radius: 10px; overflow: hidden; box-shadow: 0 0 12px rgba(0,0,0,0.2); margin-bottom: 20px; }
+    #map { width: 100%; height: 100%; }
+    .leaflet-popup-content img { width: 100%; border-radius: 6px; margin-top: 6px; }
+    .leaflet-popup-content strong { font-size: 16px; }
+    #timeline { display: flex; flex-direction: column; overflow-y: auto; max-height: 300px; gap: 12px; padding: 6px; text-align: center; }
+    .day-buttons { display: flex; overflow-x: auto; gap: 4px; padding: 4px 0; }
+    .date-button { padding: 3px 6px; border-radius: 4px; background: #eee; border: none; cursor: pointer; }
+    .date-button.active { background: #007bff; color: white; }
+    #random-btn { margin: 8px; padding: 6px 14px; font-size: 14px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -108,11 +46,7 @@
   <script>
     let allMarkers = [], markerMap = {}, stories = {}, artworks = [];
 
-    fetch("data/stories.json").then(r => r.json()).then(j => {
-      stories = j;
-    }).catch(() => {
-      console.error('随机句子数据加载失败');
-    });
+    fetch("data/stories.json").then(r => r.json()).then(j => { stories = j; });
 
     const map = L.map("map").setView([39.92, 116.38], 13);
     L.tileLayer("https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=Kraj4sMruVnY2JOZ3xff", {
@@ -126,7 +60,7 @@
       data.forEach(work => {
         const coordKey = work.coordinates.join(",");
         const date = work.time || "未知";
-        const [year, month, day] = date.split("-");
+        const [year, month] = date.split("-");
         const yyyymm = `${year}-${month}`;
         if (!byMonth[yyyymm]) byMonth[yyyymm] = [];
         byMonth[yyyymm].push({ ...work, coordKey });
@@ -148,6 +82,7 @@
             marker.openPopup();
             Fancybox.bind("[data-fancybox]", { hideScrollbar: false });
             showRandomLine(work.weather || "clear", coordKey);
+            highlightTimeline(work.time);
           });
         });
 
@@ -161,27 +96,29 @@
 
     function generatePopup(work, coordKey) {
       const icon = work.collected ? "🔴已被收藏" : "⚪";
-      return `
-        <div>
-          <strong>${work.title || "无标题"} </strong>${icon}<br/>
-          <a data-fancybox="gallery-${coordKey}" href="${work.image}" data-caption="${work.title}">
-            <img src="${work.image}" alt="作品图" />
-          </a>
-          <div><small>时间：${work.time || "未知"} ｜ 天气：${work.weather || "未知"}</small></div>
-          <p>${work.notes || ""}</p>
-          <div class="random-line" id="line-${coordKey}">圈记 · 记录着每个瞬间的光影。</div>
-        </div>
-      `;
+      let photosHtml = "";
+      if (work.photos && work.photos.length > 0) {
+        photosHtml = `<div><strong>创作记录：</strong><div style="display:flex;gap:4px;flex-wrap:wrap;">`;
+        work.photos.forEach((photo, idx) => {
+          photosHtml += `<a data-fancybox="photos-${coordKey}" href="${photo}" data-caption="创作纪实 ${idx + 1}"><img src="${photo}" alt="创作照片" style="width:48px;height:48px;object-fit:cover;border-radius:4px;" /></a>`;
+        });
+        photosHtml += `</div></div>`;
+      }
+
+      return `<div>
+        <strong>${work.title || "无标题"} </strong>${icon}<br/>
+        <div class="random-line" id="line-${coordKey}">圈记 · 记录着每个瞬间的光影。</div>
+        <a data-fancybox="gallery-${coordKey}" href="${work.image}" data-caption="${work.title}"><img src="${work.image}" alt="作品图" /></a>
+        <div><small>时间：${work.time || "未知"} ｜ 天气：${work.weather || "未知"}</small></div>
+        <p>${work.notes || ""}</p>
+        ${photosHtml}
+      </div>`;
     }
 
     function showRandomLine(weather, coordKey) {
       const lines = stories[weather] || stories["clear"] || [];
-      if (lines.length > 0) {
-        const text = lines[Math.floor(Math.random() * lines.length)];
-        document.getElementById("line-" + coordKey).innerText = text;
-      } else {
-        document.getElementById("line-" + coordKey).innerText = "暂无随机句子";
-      }
+      const text = lines.length ? lines[Math.floor(Math.random() * lines.length)] : "暂无随机句子";
+      document.getElementById("line-" + coordKey).innerText = text;
     }
 
     function buildTimeline(grouped) {
@@ -232,9 +169,11 @@
               markerMap[w.coordKey].openPopup();
               Fancybox.bind("[data-fancybox]", { hideScrollbar: false });
               showRandomLine(w.weather || "clear", w.coordKey);
+              highlightTimeline(w.time);
             });
           };
           btn.dataset.coord = w.coordKey;
+          btn.dataset.date = w.time;
           dayButtons.appendChild(btn);
         });
       };
@@ -256,8 +195,36 @@
         if (work) {
           const coordKey = work.coordinates.join(",");
           showRandomLine(work.weather || "clear", coordKey);
+          highlightTimeline(work.time);
         }
       });
+    }
+
+    function highlightTimeline(dateStr) {
+      const [year, month, day] = dateStr.split("-");
+      const yearSelect = document.getElementById("year-select");
+      const monthSelect = document.getElementById("month-select");
+      const dayButtons = document.getElementById("day-buttons");
+
+      if (yearSelect.value !== year) {
+        yearSelect.value = year;
+        yearSelect.onchange();
+      }
+      if (monthSelect.value !== month) {
+        monthSelect.value = month;
+        monthSelect.onchange();
+      }
+
+      setTimeout(() => {
+        const buttons = dayButtons.querySelectorAll(".date-button");
+        buttons.forEach(btn => {
+          btn.classList.remove("active");
+          if (btn.dataset.date === dateStr) {
+            btn.classList.add("active");
+            btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+          }
+        });
+      }, 100);
     }
   </script>
 </body>
