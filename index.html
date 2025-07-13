@@ -1,6 +1,6 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="zh">
+
 <head>
   <meta charset="UTF-8" />
   <title>圈记 Circlelog</title>
@@ -9,21 +9,144 @@
   <link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" />
   <link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
-    body { margin: 0; font-family: sans-serif; background: #f7f7f7; display: flex; flex-direction: column; align-items: center; }
-    .title { margin: 16px; font-size: 24px; text-align: center; }
-    .cont { margin: 16px; font-size: 16px; text-align: center; }
-    #map-container { width: 95%; max-width: 800px; height: 70vh; border-radius: 10px; overflow: hidden; box-shadow: 0 0 12px rgba(0,0,0,0.2); margin-bottom: 20px; }
-    #map { width: 100%; height: 100%; }
-    .leaflet-popup-content img { width: 100%; border-radius: 6px; margin-top: 6px; }
-    .leaflet-popup-content strong { font-size: 16px; }
-    #timeline { display: flex; flex-direction: column; overflow-y: auto; max-height: 300px; gap: 12px; padding: 6px; text-align: center; }
-    .day-buttons { display: flex; overflow-x: auto; gap: 4px; padding: 4px 0; }
-    .date-button { padding: 3px 6px; border-radius: 4px; background: #eee; border: none; cursor: pointer; }
-    .date-button.active { background: #007bff; color: white; }
-    #random-btn { margin: 8px; padding: 6px 14px; font-size: 14px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #121212;
+      color: #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+   .title {
+      margin: 32px 16px 16px;
+      font-size: 36px;
+      text-align: center;
+      font-weight: 600;
+      background: linear-gradient(45deg, #ff6b6b, #6b6bff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+   .cont {
+      margin: 16px;
+      font-size: 18px;
+      text-align: center;
+      opacity: 0.8;
+    }
+
+    #random-btn {
+      margin: 24px 8px;
+      padding: 12px 24px;
+      font-size: 16px;
+      background: linear-gradient(45deg, #ff6b6b, #6b6bff);
+      color: white;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    #random-btn:hover {
+      transform: scale(1.05);
+    }
+
+    #timeline {
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      max-height: 300px;
+      gap: 12px;
+      padding: 16px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      margin-bottom: 24px;
+    }
+
+   .day-buttons {
+      display: flex;
+      overflow-x: auto;
+      gap: 8px;
+      padding: 8px 0;
+    }
+
+   .date-button {
+      padding: 6px 12px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      cursor: pointer;
+      color: #e0e0e0;
+      transition: all 0.3s ease;
+    }
+
+   .date-button.active {
+      background: linear-gradient(45deg, #ff6b6b, #6b6bff);
+      color: white;
+    }
+
+   .date-button:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    #map-container {
+      width: 95%;
+      max-width: 800px;
+      height: 70vh;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+      margin-bottom: 48px;
+      transition: all 0.3s ease;
+    }
+
+    #map-container:hover {
+      transform: scale(1.01);
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+
+   .leaflet-popup-content img {
+      width: 100%;
+      border-radius: 6px;
+      margin-top: 6px;
+      transition: all 0.3s ease;
+    }
+
+   .leaflet-popup-content img:hover {
+      transform: scale(1.05);
+    }
+
+   .leaflet-popup-content strong {
+      font-size: 16px;
+    }
+
+    select {
+      padding: 8px 12px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: #e0e0e0;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    select:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
   </style>
 </head>
+
 <body>
   <div class="title">《圈记 Circlelog》——在纸上画圈，在时光存档</div>
   <div class="cont">“当我画第一个圆，我在画它；当我画第一百个圆，它在画我。”</div>
@@ -37,16 +160,15 @@
     </div>
     <div id="day-buttons" class="day-buttons"></div>
   </div>
-
   <div id="map-container"><div id="map"></div></div>
 
   <script src="https://cdnjs.loli.net/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
   <script src="https://cdnjs.loli.net/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
   <script>
-    let allMarkers = [], markerMap = {}, stories = {}, artworks = [];
+    let allMarkers = [], markerMap = {}, stories = {}, artworks = [], collectorLines = [];
 
-    fetch("data/stories.json").then(r => r.json()).then(j => { stories = j; });
+    fetch("data/stories.json").then(r => r.json()).then(j => stories = j);
 
     const map = L.map("map").setView([39.92, 116.38], 13);
     L.tileLayer("https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=Kraj4sMruVnY2JOZ3xff", {
@@ -57,10 +179,10 @@
       artworks = data;
       const clusterGroup = L.markerClusterGroup();
       const byMonth = {};
+
       data.forEach(work => {
         const coordKey = work.coordinates.join(",");
-        const date = work.time || "未知";
-        const [year, month] = date.split("-");
+        const [year, month] = (work.time || "未知").split("-");
         const yyyymm = `${year}-${month}`;
         if (!byMonth[yyyymm]) byMonth[yyyymm] = [];
         byMonth[yyyymm].push({ ...work, coordKey });
@@ -68,11 +190,8 @@
         const html = generatePopup(work, coordKey);
         const icon = L.icon({
           iconUrl: work.collected ? 'images/red-marker.png' : 'images/blue-marker.png',
-          iconSize: [25, 41],
-          iconAnchor: [12, 41],
-          popupAnchor: [1, -34],
-          shadowUrl: 'https://cdnjs.loli.net/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-          shadowSize: [41, 41]
+          iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34],
+          shadowUrl: 'https://cdnjs.loli.net/ajax/libs/leaflet/1.9.4/images/marker-shadow.png', shadowSize: [41, 41]
         });
 
         const marker = L.marker(work.coordinates, { icon }).bindPopup(html);
@@ -82,16 +201,52 @@
             marker.openPopup();
             Fancybox.bind("[data-fancybox]", { hideScrollbar: false });
             showRandomLine(work.weather || "clear", coordKey);
-            highlightTimeline(work.time);
+            highlightDate(work.time);
+            setTimeout(() => {
+              const popup = document.querySelector('.leaflet-popup');
+              if (popup) {
+                const mapRect = map.getContainer().getBoundingClientRect();
+                const popupRect = popup.getBoundingClientRect();
+                const offsetTop = popupRect.top - mapRect.top;
+                if (offsetTop < 10) {
+                  map.panBy([0, offsetTop - 10], { animate: true });
+                }
+              }
+            }, 300);
           });
         });
 
         allMarkers.push({ marker, coords: work.coordinates });
         markerMap[coordKey] = marker;
         clusterGroup.addLayer(marker);
+
+        if (Array.isArray(work.collector_coordinates)) {
+          const collectorLatLng = work.collector_coordinates;
+          const line = L.polyline([work.coordinates, collectorLatLng], {
+            color: 'red', weight: 1.2, dashArray: '4,4', opacity: 0.8
+          }).addTo(map);
+          collectorLines.push(line);
+
+          L.circleMarker(collectorLatLng, {
+            radius: 6, fillColor: 'red', color: 'red', weight: 1,
+            opacity: 0.6, fillOpacity: 0.4
+          }).addTo(map);
+        }
       });
+
       map.addLayer(clusterGroup);
       buildTimeline(byMonth);
+
+      const urlParams = new URLSearchParams(location.search);
+      const lat = parseFloat(urlParams.get("lat"));
+      const lng = parseFloat(urlParams.get("lng"));
+      if (!isNaN(lat) && !isNaN(lng)) {
+        const markerObj = allMarkers.find(m => m.coords[0] === lat && m.coords[1] === lng);
+        if (markerObj) {
+          map.setView(markerObj.coords, 16);
+          setTimeout(() => markerObj.marker.openPopup(), 500);
+        }
+      }
     });
 
     function generatePopup(work, coordKey) {
@@ -100,25 +255,29 @@
       if (work.photos && work.photos.length > 0) {
         photosHtml = `<div><strong>创作记录：</strong><div style="display:flex;gap:4px;flex-wrap:wrap;">`;
         work.photos.forEach((photo, idx) => {
-          photosHtml += `<a data-fancybox="photos-${coordKey}" href="${photo}" data-caption="创作纪实 ${idx + 1}"><img src="${photo}" alt="创作照片" style="width:48px;height:48px;object-fit:cover;border-radius:4px;" /></a>`;
+          photosHtml += `
+            <a data-fancybox="photos-${coordKey}" href="${photo}" data-caption="创作纪实 ${idx + 1}">
+              <img src="${photo}" alt="创作照片" style="width:48px;height:48px;object-fit:cover;border-radius:4px;" />
+            </a>`;
         });
         photosHtml += `</div></div>`;
       }
-
-      return `<div>
-        <strong>${work.title || "无标题"} </strong>${icon}<br/>
-        <div class="random-line" id="line-${coordKey}">圈记 · 记录着每个瞬间的光影。</div>
-        <a data-fancybox="gallery-${coordKey}" href="${work.image}" data-caption="${work.title}"><img src="${work.image}" alt="作品图" /></a>
-        <div><small>时间：${work.time || "未知"} ｜ 天气：${work.weather || "未知"}</small></div>
-        <p>${work.notes || ""}</p>
-        ${photosHtml}
-      </div>`;
+      return `
+        <div>
+          <strong>${work.title || "无标题"} </strong>${icon}<br/>
+          <div class="random-line" id="line-${coordKey}">圈记 · 记录着每个瞬间的光影。</div>
+          <a data-fancybox="gallery-${coordKey}" href="${work.image}" data-caption="${work.title}">
+            <img src="${work.image}" alt="作品图" />
+          </a>
+          <div><small>时间：${work.time || "未知"} ｜ 天气：${work.weather || "未知"}</small></div>
+          <p>${work.notes || ""}</p>
+          ${photosHtml}
+        </div>`;
     }
 
     function showRandomLine(weather, coordKey) {
       const lines = stories[weather] || stories["clear"] || [];
-      const text = lines.length ? lines[Math.floor(Math.random() * lines.length)] : "暂无随机句子";
-      document.getElementById("line-" + coordKey).innerText = text;
+      document.getElementById("line-" + coordKey).innerText = lines.length ? lines[Math.floor(Math.random() * lines.length)] : "暂无随机句子";
     }
 
     function buildTimeline(grouped) {
@@ -136,8 +295,7 @@
       const years = Object.keys(yearMap).sort().reverse();
       years.forEach(y => {
         const opt = document.createElement("option");
-        opt.value = y;
-        opt.text = y;
+        opt.value = y; opt.text = y;
         yearSelect.appendChild(opt);
       });
 
@@ -146,8 +304,7 @@
         monthSelect.innerHTML = "";
         Object.keys(yearMap[y] || {}).sort().forEach(m => {
           const opt = document.createElement("option");
-          opt.value = m;
-          opt.text = m;
+          opt.value = m; opt.text = m;
           monthSelect.appendChild(opt);
         });
         monthSelect.onchange();
@@ -160,20 +317,18 @@
         dayButtons.innerHTML = "";
         works.forEach(w => {
           const btn = document.createElement("button");
-          const icon = w.collected ? "🔴" : "⚪";
           btn.className = "date-button";
-          btn.textContent = `${icon} ${w.time.split("-")[2]}`;
+          btn.textContent = `${w.collected ? "🔴" : "⚪"} ${w.time.split("-")[2]}`;
           btn.onclick = () => {
-            map.setView(w.coordinates, 16, { animate: true, pan: { duration: 1 } });
-            map.once('moveend', () => {
+            map.setView(w.coordinates, 16, { animate: true });
+            map.once("moveend", () => {
               markerMap[w.coordKey].openPopup();
               Fancybox.bind("[data-fancybox]", { hideScrollbar: false });
               showRandomLine(w.weather || "clear", w.coordKey);
-              highlightTimeline(w.time);
+              highlightDate(w.time);
             });
           };
           btn.dataset.coord = w.coordKey;
-          btn.dataset.date = w.time;
           dayButtons.appendChild(btn);
         });
       };
@@ -184,10 +339,37 @@
       }
     }
 
+    function highlightDate(dateStr) {
+      if (!dateStr) return;
+      const [y, m, d] = dateStr.split("-");
+      const yearSelect = document.getElementById("year-select");
+      const monthSelect = document.getElementById("month-select");
+
+      if (yearSelect.value !== y) {
+        yearSelect.value = y;
+        yearSelect.onchange();
+      }
+
+      if (monthSelect.value !== m) {
+        monthSelect.value = m;
+        monthSelect.onchange();
+      }
+
+      setTimeout(() => {
+        const buttons = document.querySelectorAll(".date-button");
+        buttons.forEach(btn => btn.classList.remove("active"));
+        const target = [...buttons].find(btn => btn.textContent.includes(d));
+        if (target) {
+          target.classList.add("active");
+          target.scrollIntoView({ behavior: "smooth", inline: "center" });
+        }
+      }, 300);
+    }
+
     function jumpToRandom() {
       if (!allMarkers.length) return;
       const { marker, coords } = allMarkers[Math.floor(Math.random() * allMarkers.length)];
-      map.setView(coords, 16, { animate: true, pan: { duration: 1 } });
+      map.setView(coords, 16, { animate: true });
       map.once('moveend', () => {
         marker.openPopup();
         Fancybox.bind("[data-fancybox]", { hideScrollbar: false });
@@ -195,37 +377,11 @@
         if (work) {
           const coordKey = work.coordinates.join(",");
           showRandomLine(work.weather || "clear", coordKey);
-          highlightTimeline(work.time);
+          highlightDate(work.time);
         }
       });
     }
-
-    function highlightTimeline(dateStr) {
-      const [year, month, day] = dateStr.split("-");
-      const yearSelect = document.getElementById("year-select");
-      const monthSelect = document.getElementById("month-select");
-      const dayButtons = document.getElementById("day-buttons");
-
-      if (yearSelect.value !== year) {
-        yearSelect.value = year;
-        yearSelect.onchange();
-      }
-      if (monthSelect.value !== month) {
-        monthSelect.value = month;
-        monthSelect.onchange();
-      }
-
-      setTimeout(() => {
-        const buttons = dayButtons.querySelectorAll(".date-button");
-        buttons.forEach(btn => {
-          btn.classList.remove("active");
-          if (btn.dataset.date === dateStr) {
-            btn.classList.add("active");
-            btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-          }
-        });
-      }, 100);
-    }
   </script>
 </body>
+
 </html>
