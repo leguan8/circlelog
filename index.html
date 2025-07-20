@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="zh">
-
 <head>
   <meta charset="UTF-8" />
   <title>圈记 Circlelog</title>
@@ -9,8 +8,9 @@
   <link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" />
   <link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
   <style>
+    /* 保持原有样式不变 */
     body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
@@ -20,8 +20,7 @@
       flex-direction: column;
       align-items: center;
     }
-
-   .title {
+    .title {
       margin: 32px 16px 16px;
       font-size: 36px;
       text-align: center;
@@ -30,14 +29,12 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-
-   .cont {
+    .cont {
       margin: 16px;
       font-size: 18px;
       text-align: center;
       opacity: 0.8;
     }
-
     #random-btn {
       margin: 24px 8px;
       padding: 12px 24px;
@@ -49,11 +46,9 @@
       cursor: pointer;
       transition: all 0.3s ease;
     }
-
     #random-btn:hover {
       transform: scale(1.05);
     }
-
     #timeline {
       display: flex;
       flex-direction: column;
@@ -66,15 +61,13 @@
       border-radius: 10px;
       margin-bottom: 24px;
     }
-
-   .day-buttons {
+    .day-buttons {
       display: flex;
       overflow-x: auto;
       gap: 8px;
       padding: 8px 0;
     }
-
-   .date-button {
+    .date-button {
       padding: 6px 12px;
       border-radius: 20px;
       background: rgba(255, 255, 255, 0.1);
@@ -83,16 +76,13 @@
       color: #e0e0e0;
       transition: all 0.3s ease;
     }
-
-   .date-button.active {
+    .date-button.active {
       background: linear-gradient(45deg, #ff6b6b, #6b6bff);
       color: white;
     }
-
-   .date-button:hover {
+    .date-button:hover {
       background: rgba(255, 255, 255, 0.2);
     }
-
     #map-container {
       width: 95%;
       max-width: 800px;
@@ -103,31 +93,25 @@
       margin-bottom: 48px;
       transition: all 0.3s ease;
     }
-
     #map-container:hover {
       transform: scale(1.01);
     }
-
     #map {
       width: 100%;
       height: 100%;
     }
-
-   .leaflet-popup-content img {
+    .leaflet-popup-content img {
       width: 100%;
       border-radius: 6px;
       margin-top: 6px;
       transition: all 0.3s ease;
     }
-
-   .leaflet-popup-content img:hover {
+    .leaflet-popup-content img:hover {
       transform: scale(1.05);
     }
-
-   .leaflet-popup-content strong {
+    .leaflet-popup-content strong {
       font-size: 16px;
     }
-
     select {
       padding: 8px 12px;
       border-radius: 20px;
@@ -140,17 +124,15 @@
       cursor: pointer;
       transition: all 0.3s ease;
     }
-
     select:hover {
       background: rgba(255, 255, 255, 0.2);
     }
   </style>
 </head>
-
 <body>
   <div class="title">《圈记 Circlelog》——在纸上画圈，在时光存档</div>
-  <div class="cont">“当我画第一个圆，我在画它；当我画第一百个圆，它在画我。”</div>
-  <button id="random-btn" onclick="jumpToRandom()">🎲 随机跳转一幅圈记</button>
+  <div class="cont">"当我画第一个圆，我在画它；当我画第一百个圆，它在画我。"</div>
+  <button id="random-btn">🎲 随机跳转一幅圈记</button>
   <div id="timeline">
     <div>
       <label>年份：</label>
@@ -166,7 +148,8 @@
   <script src="https://cdnjs.loli.net/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
   <script>
-    let allMarkers = [], markerMap = {}, stories = {}, artworks = [], collectorLines = [];
+    let allMarkers = [], markerMap = {}, stories = {}, artworks = [], collectorPointMap = {};
+    let clusterGroup; // 将聚类组声明为全局变量
 
     fetch("data/stories.json").then(r => r.json()).then(j => stories = j);
 
@@ -175,61 +158,105 @@
       attribution: "© MapTiler & OpenStreetMap contributors", tileSize: 512, zoomOffset: -1
     }).addTo(map);
 
+    // 初始化聚类组
+    clusterGroup = L.markerClusterGroup({
+      chunkedLoading: true,
+      disableClusteringAtZoom: 16 // 在16级缩放时禁用聚类
+    });
+
     fetch("data/artworks.json").then(r => r.json()).then(data => {
       artworks = data;
-      const clusterGroup = L.markerClusterGroup();
       const byMonth = {};
+      collectorPointMap = {};
 
       data.forEach(work => {
-        const coordKey = work.coordinates.join(",");
+        const workCoords = work.coordinates.map(Number);
+        const coordKey = workCoords.join(",");
         const [year, month] = (work.time || "未知").split("-");
         const yyyymm = `${year}-${month}`;
         if (!byMonth[yyyymm]) byMonth[yyyymm] = [];
         byMonth[yyyymm].push({ ...work, coordKey });
 
-        const html = generatePopup(work, coordKey);
+        const isCollected = work.collected === true;
+
         const icon = L.icon({
-          iconUrl: work.collected ? 'images/red-marker.png' : 'images/blue-marker.png',
+          iconUrl: isCollected ? 'images/red-marker.png' : 'images/blue-marker.png',
           iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34],
-          shadowUrl: 'https://cdnjs.loli.net/ajax/libs/leaflet/1.9.4/images/marker-shadow.png', shadowSize: [41, 41]
+          shadowUrl: 'https://cdnjs.loli.net/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+          shadowSize: [41, 41]
         });
 
-        const marker = L.marker(work.coordinates, { icon }).bindPopup(html);
+        const iconHtml = isCollected
+          ? `🔴 收藏者：<strong>${work.collector?.name || "未知"}</strong>`
+          : "⚪ 未收藏";
+
+        const photosHtml = (work.photos && work.photos.length > 0)
+          ? `<div><strong>创作记录：</strong><div style="display:flex;gap:4px;flex-wrap:wrap;">` +
+            work.photos.map((photo, idx) => `
+              <a data-fancybox="photos-${coordKey}" href="${photo}" data-caption="创作纪实 ${idx + 1}">
+                <img src="${photo}" alt="创作照片" style="width:48px;height:48px;object-fit:cover;border-radius:4px;" />
+              </a>`).join('') +
+            `</div></div>`
+          : "";
+
+        const html = `
+          <div>
+            <strong>${work.title || "无标题"} </strong>${iconHtml}<br/>
+            <div class="random-line" id="line-${coordKey}">圈记 · 记录着每个瞬间的光影。</div>
+            <a data-fancybox="gallery-${coordKey}" href="${work.image}" data-caption="${work.title}">
+              <img src="${work.image}" alt="作品图" />
+            </a>
+            <div><small>时间：${work.time || "未知"} ｜ 天气：${work.weather || "未知"}</small></div>
+            <p>${work.notes || ""}</p>
+            ${photosHtml}
+          </div>`;
+
+        const marker = L.marker(workCoords, { icon }).bindPopup(html);
         marker.on("click", () => {
-          map.setView(work.coordinates, 16, { animate: true, pan: { duration: 1 } });
-          map.once('moveend', () => {
-            marker.openPopup();
-            Fancybox.bind("[data-fancybox]", { hideScrollbar: false });
-            showRandomLine(work.weather || "clear", coordKey);
-            highlightDate(work.time);
-            setTimeout(() => {
-              const popup = document.querySelector('.leaflet-popup');
-              if (popup) {
-                const mapRect = map.getContainer().getBoundingClientRect();
-                const popupRect = popup.getBoundingClientRect();
-                const offsetTop = popupRect.top - mapRect.top;
-                if (offsetTop < 10) {
-                  map.panBy([0, offsetTop - 10], { animate: true });
-                }
-              }
-            }, 300);
-          });
+          ensureMarkerVisible(marker, work);
         });
 
-        allMarkers.push({ marker, coords: work.coordinates });
+        allMarkers.push({ marker, coords: workCoords });
         markerMap[coordKey] = marker;
         clusterGroup.addLayer(marker);
 
-        if (Array.isArray(work.collector_coordinates)) {
-          const collectorLatLng = work.collector_coordinates;
-          const line = L.polyline([work.coordinates, collectorLatLng], {
-            color: 'red', weight: 1.2, dashArray: '4,4', opacity: 0.8
-          }).addTo(map);
-          collectorLines.push(line);
+        if (Array.isArray(work.collector_coordinates) && work.collector_coordinates.length === 2 && isCollected) {
+          const collectorCoords = work.collector_coordinates.map(Number);
+          const collectorKey = collectorCoords.join(",");
 
-          L.circleMarker(collectorLatLng, {
-            radius: 6, fillColor: 'red', color: 'red', weight: 1,
-            opacity: 0.6, fillOpacity: 0.4
+          if (!collectorPointMap[collectorKey]) {
+            collectorPointMap[collectorKey] = true;
+
+            let level = 0;
+            if (work.collector?.level) {
+              const match = work.collector.level.match(/\d+/);
+              if (match) level = parseInt(match[0], 10);
+              if (level < 0) level = 0;
+              if (level > 4) level = 4;
+            }
+            const colors = ["#888", "#66f", "#4f4", "#fc0", "#f00"];
+            const color = colors[level] || "#ccc";
+            const radius = 5 + level;
+
+            const popupContent = `
+              <div>
+                <strong>收藏者：</strong>${work.collector?.name || "未知"}<br/>
+                ${work.collector?.link ? `<a href="${work.collector.link}" target="_blank" style="color:#ffcc00;">🔗 个人主页</a><br/>` : ""}
+                <small>${work.collector?.position || ""}</small>
+              </div>`;
+
+            L.circleMarker(collectorCoords, {
+              radius: radius,
+              fillColor: color,
+              color: color,
+              weight: 1,
+              opacity: 0.8,
+              fillOpacity: 0.6
+            }).bindPopup(popupContent).addTo(map);
+          }
+
+          L.polyline([workCoords, work.collector_coordinates.map(Number)], {
+            color: 'red', weight: 1.2, dashArray: '4,4', opacity: 0.8
           }).addTo(map);
         }
       });
@@ -237,6 +264,7 @@
       map.addLayer(clusterGroup);
       buildTimeline(byMonth);
 
+      // URL参数处理
       const urlParams = new URLSearchParams(location.search);
       const lat = parseFloat(urlParams.get("lat"));
       const lng = parseFloat(urlParams.get("lng"));
@@ -244,40 +272,61 @@
         const markerObj = allMarkers.find(m => m.coords[0] === lat && m.coords[1] === lng);
         if (markerObj) {
           map.setView(markerObj.coords, 16);
-          setTimeout(() => markerObj.marker.openPopup(), 500);
+          setTimeout(() => {
+            ensureMarkerVisible(markerObj.marker, 
+              artworks.find(w => Number(w.coordinates[0]) === lat && Number(w.coordinates[1]) === lng)
+            );
+          }, 500);
         }
       }
     });
 
-    function generatePopup(work, coordKey) {
-      const icon = work.collected ? "🔴已被收藏" : "⚪";
-      let photosHtml = "";
-      if (work.photos && work.photos.length > 0) {
-        photosHtml = `<div><strong>创作记录：</strong><div style="display:flex;gap:4px;flex-wrap:wrap;">`;
-        work.photos.forEach((photo, idx) => {
-          photosHtml += `
-            <a data-fancybox="photos-${coordKey}" href="${photo}" data-caption="创作纪实 ${idx + 1}">
-              <img src="${photo}" alt="创作照片" style="width:48px;height:48px;object-fit:cover;border-radius:4px;" />
-            </a>`;
-        });
-        photosHtml += `</div></div>`;
+    // 确保标记可见并打开弹窗的通用函数
+    function ensureMarkerVisible(marker, work) {
+      map.setView(marker.getLatLng(), 16, { animate: true });
+      
+      map.once("moveend", () => {
+        // 如果标记在聚类组中，先展开聚类
+        if (clusterGroup.hasLayer(marker)) {
+          clusterGroup.zoomToShowLayer(marker, function() {
+            marker.openPopup();
+            afterPopupOpen(work);
+          });
+        } else {
+          marker.openPopup();
+          afterPopupOpen(work);
+        }
+      });
+    }
+
+    function afterPopupOpen(work) {
+      Fancybox.bind("[data-fancybox]", { hideScrollbar: false });
+      if (work) {
+        const coordKey = work.coordinates.map(Number).join(",");
+        showRandomLine(work.weather || "clear", coordKey);
+        highlightDate(work.time);
+        setTimeout(adjustPopupPosition, 300);
       }
-      return `
-        <div>
-          <strong>${work.title || "无标题"} </strong>${icon}<br/>
-          <div class="random-line" id="line-${coordKey}">圈记 · 记录着每个瞬间的光影。</div>
-          <a data-fancybox="gallery-${coordKey}" href="${work.image}" data-caption="${work.title}">
-            <img src="${work.image}" alt="作品图" />
-          </a>
-          <div><small>时间：${work.time || "未知"} ｜ 天气：${work.weather || "未知"}</small></div>
-          <p>${work.notes || ""}</p>
-          ${photosHtml}
-        </div>`;
     }
 
     function showRandomLine(weather, coordKey) {
       const lines = stories[weather] || stories["clear"] || [];
-      document.getElementById("line-" + coordKey).innerText = lines.length ? lines[Math.floor(Math.random() * lines.length)] : "暂无随机句子";
+      document.getElementById("line-" + coordKey).innerText = lines.length
+        ? lines[Math.floor(Math.random() * lines.length)]
+        : "暂无随机句子";
+    }
+
+    function adjustPopupPosition() {
+      const popup = document.querySelector('.leaflet-popup');
+      if (popup) {
+        const mapRect = map.getContainer().getBoundingClientRect();
+        const popupRect = popup.getBoundingClientRect();
+        const offsetTop = popupRect.top - mapRect.top;
+        
+        if (offsetTop < 20) {
+          map.panBy([0, offsetTop - 20], { animate: true });
+        }
+      }
     }
 
     function buildTimeline(grouped) {
@@ -318,70 +367,42 @@
         works.forEach(w => {
           const btn = document.createElement("button");
           btn.className = "date-button";
-          btn.textContent = `${w.collected ? "🔴" : "⚪"} ${w.time.split("-")[2]}`;
+          btn.textContent = `${w.collected === true ? "🔴" : "⚪"} ${w.time.split("-")[2]}`;
           btn.onclick = () => {
-            map.setView(w.coordinates, 16, { animate: true });
-            map.once("moveend", () => {
-              markerMap[w.coordKey].openPopup();
-              Fancybox.bind("[data-fancybox]", { hideScrollbar: false });
-              showRandomLine(w.weather || "clear", w.coordKey);
-              highlightDate(w.time);
-            });
+            const marker = markerMap[w.coordinates.join(",")];
+            if (marker) ensureMarkerVisible(marker, w);
           };
-          btn.dataset.coord = w.coordKey;
           dayButtons.appendChild(btn);
         });
       };
 
-      if (years.length > 0) {
+      if (years.length) {
         yearSelect.value = years[0];
         yearSelect.onchange();
       }
     }
 
     function highlightDate(dateStr) {
-      if (!dateStr) return;
-      const [y, m, d] = dateStr.split("-");
-      const yearSelect = document.getElementById("year-select");
-      const monthSelect = document.getElementById("month-select");
-
-      if (yearSelect.value !== y) {
-        yearSelect.value = y;
-        yearSelect.onchange();
-      }
-
-      if (monthSelect.value !== m) {
-        monthSelect.value = m;
-        monthSelect.onchange();
-      }
-
-      setTimeout(() => {
-        const buttons = document.querySelectorAll(".date-button");
-        buttons.forEach(btn => btn.classList.remove("active"));
-        const target = [...buttons].find(btn => btn.textContent.includes(d));
-        if (target) {
-          target.classList.add("active");
-          target.scrollIntoView({ behavior: "smooth", inline: "center" });
-        }
-      }, 300);
-    }
-
-    function jumpToRandom() {
-      if (!allMarkers.length) return;
-      const { marker, coords } = allMarkers[Math.floor(Math.random() * allMarkers.length)];
-      map.setView(coords, 16, { animate: true });
-      map.once('moveend', () => {
-        marker.openPopup();
-        Fancybox.bind("[data-fancybox]", { hideScrollbar: false });
-        const work = artworks.find(w => w.coordinates[0] === coords[0] && w.coordinates[1] === coords[1]);
-        if (work) {
-          const coordKey = work.coordinates.join(",");
-          showRandomLine(work.weather || "clear", coordKey);
-          highlightDate(work.time);
+      const dayButtons = document.getElementById("day-buttons");
+      const buttons = dayButtons.querySelectorAll(".date-button");
+      buttons.forEach(btn => btn.classList.remove("active"));
+      buttons.forEach(btn => {
+        if (btn.textContent.includes(dateStr.split("-")[2])) {
+          btn.classList.add("active");
         }
       });
     }
+
+    document.getElementById("random-btn").addEventListener("click", jumpToRandom);
+
+    function jumpToRandom() {
+      if (allMarkers.length === 0) return;
+      const idx = Math.floor(Math.random() * allMarkers.length);
+      const m = allMarkers[idx];
+      ensureMarkerVisible(m.marker, 
+        artworks.find(w => w.coordinates[0] == m.coords[0] && w.coordinates[1] == m.coords[1])
+      );
+    }
   </script>
 </body>
-
 </html>
