@@ -1,73 +1,200 @@
 [
     {
-        "title": "圈记 No.2 他的脸",
+        "title": "一团和气",
         "coordinates": [
-            39.908152,
-            116.39122
+            40.072214,
+            116.321783
         ],
-        "image": "uploads\/art_686cfda5983980.90858483.jpg",
-        "time": "2025-07-01",
-        "notes": "白日依山尽黄河入海流",
-        "weather": "多云，35°C",
-        "collected": false
-    },
-    {
-        "title": "圈记 No.3 焦虑的风",
-        "coordinates": [
-            39.957057,
-            116.40219
-        ],
-        "image": "uploads\/art_686d2cd1c4acc5.01392017.jpg",
-        "time": "2025-07-08",
-        "notes": "谁说的多去银行，一个章盖了几十遍",
-        "weather": "多云，35°C",
-        "collected": true
-    },
-    {
-        "title": "圈记 No.4 盲从的空气",
-        "coordinates": [
-            39.924348,
-            116.425037
-        ],
-        "image": "uploads\/art_686e0af333e460.47225088.JPG",
-        "time": "2025-07-02",
+        "image": "uploads\/687a4dc50959e.jpg",
+        "time": "2025-07-18 15:36:05",
         "notes": "",
-        "weather": "多云，35°C",
-        "photos": [
-            "uploads\/photo\/photo_686e0af3340267.87101264.jpg",
-            "uploads\/photo\/photo_686e0af35a1436.25723857.jpg",
-            "uploads\/photo\/photo_686e0af3740318.69734177.PNG"
-        ]
-    },
-    {
-        "title": "圈记 No.5 盲从的风",
-        "coordinates": [
-            39.921584,
-            116.426239
-        ],
-        "image": "uploads\/art_686e0b6a21b5c4.94639631.jpg",
-        "time": "2025-07-03",
-        "notes": "",
-        "weather": "多云，35°C",
-        "photos": [
-            "uploads\/photo\/photo_686e0b6a21e1b3.36427867.jpg",
-            "uploads\/photo\/photo_686e0b6a4a35f0.79123894.jpg"
-        ]
-    },
-    {
-        "title": "圈记 No.6 命运的轨迹",
-        "coordinates": [
-            39.951464,
-            116.407871
-        ],
-        "image": "uploads\/art_686e108caaa1b0.62300827.jpg",
-        "time": "2025-06-04",
-        "notes": "在地坛，想起了史铁生",
         "weather": "多云，35°C",
         "collected": true,
         "photos": [
-            "uploads\/photo\/photo_686e108cc8ca21.64467170.png",
-            "uploads\/photo\/photo_686e108cd7f1c2.44646527.png"
+            "uploads\/photo\/p_687a4dc509729.png"
+        ],
+        "collector": {
+            "name": "大猫",
+            "link": "http:\/\/www.youtube.com",
+            "level": "Lv.3",
+            "position": ""
+        },
+        "collector_coordinates": [
+            33.123751,
+            106.083984
+        ]
+    },
+    {
+        "title": "前门下午的晴天",
+        "coordinates": [
+            39.898208,
+            116.391349
+        ],
+        "image": "uploads\/687a4e9cdb5b5.jpg",
+        "time": "2025-07-18 15:39:40",
+        "notes": "被叫大爷了",
+        "weather": "晴，35°C",
+        "collected": true,
+        "photos": [
+            "uploads\/photo\/p_687a4e9cdb6e7.PNG"
+        ],
+        "collector": {
+            "name": "行二",
+            "link": "http:\/\/www.youtube.com",
+            "level": "Lv.1",
+            "position": "山海经"
+        },
+        "collector_coordinates": [
+            38.850403,
+            117.202148
+        ]
+    },
+    {
+        "title": "丢三落四",
+        "coordinates": [
+            39.896844,
+            116.390913
+        ],
+        "image": "uploads\/687a52ae5dbab.jpg",
+        "time": "2025-07-18 15:57:02",
+        "notes": "chatgpt有点费劲",
+        "weather": "多云，30°C",
+        "collected": true,
+        "photos": [
+            "uploads\/photo\/p_687a52ae5dcab.png"
+        ],
+        "collector": {
+            "name": "大猫",
+            "link": "",
+            "level": "Lv.3",
+            "position": "山海经"
+        },
+        "collector_coordinates": [
+            33.123751,
+            106.083984
+        ]
+    },
+    {
+        "title": "美少女打不来哦",
+        "coordinates": [
+            39.646411,
+            115.9648
+        ],
+        "image": "uploads\/687a564fe51cf.jpg",
+        "time": "2025-07-18 16:12:31",
+        "notes": "",
+        "weather": "多云",
+        "collected": false,
+        "photos": [],
+        "collector": {
+            "name": "赵嘟嘟",
+            "link": "",
+            "level": "Lv.1",
+            "position": "山海经第二"
+        },
+        "collector_coordinates": [
+            41.244256,
+            120.314225
+        ]
+    },
+    {
+        "title": "柴米多",
+        "coordinates": [
+            "39.91842410438729",
+            "116.42366409301759"
+        ],
+        "image": "uploads\/1752850067_art_686e0af333e460.47225088.JPG",
+        "time": "2025-07-03T17:45",
+        "notes": "",
+        "weather": "晴",
+        "temperature": "-20°C",
+        "collected": "true",
+        "photos": [],
+        "collector": {
+            "name": "大猫",
+            "link": "http:\/\/www.youtube.com",
+            "level": "Lv.3",
+            "position": "山海经第二"
+        },
+        "collector_coordinates": [
+            "31.277377164005095",
+            "120.93750000000001"
+        ]
+    },
+    {
+        "title": "阿萨夫的顶礼佛那个",
+        "coordinates": [
+            "40.98653942720434",
+            "113.13034057617189"
+        ],
+        "image": "uploads\/1752850855_art_686e108caaa1b0.62300827.jpg",
+        "time": "2025-07-09",
+        "notes": "蓝蓝的天上白云飘",
+        "weather": "晴",
+        "temperature": "25°C",
+        "collected": true,
+        "photos": [
+            "uploads\/photo\/1752850855_photo_686e0af3740318.69734177.PNG"
+        ],
+        "collector": {
+            "name": "大猫",
+            "link": "http:\/\/www.youtube.com",
+            "level": "Lv.3",
+            "position": ""
+        },
+        "collector_coordinates": [
+            33.123751,
+            106.083984
+        ]
+    },
+    {
+        "title": "No.7 每个人都有编号",
+        "coordinates": [
+            "41.109364719750964",
+            "113.00537109375001"
+        ],
+        "image": "uploads\/1752851438_687a564fe51cf.jpg",
+        "time": "2025-07-01T14:10",
+        "notes": "",
+        "weather": "晴",
+        "temperature": "-20°C",
+        "collected": "true",
+        "photos": [
+            "uploads\/photo\/1752851438_photo_686e0b6a21e1b3.36427867.jpg"
+        ],
+        "collector": {
+            "name": "大猫",
+            "link": "http:\/\/www.youtube.com",
+            "level": "Lv.3",
+            "position": "山海经第二"
+        },
+        "collector_coordinates": [
+            "33.123751",
+            "106.083984"
+        ]
+    },
+    {
+        "title": "No.8 MM金拱门",
+        "coordinates": [
+            "39.966398397374036",
+            "116.39053344726564"
+        ],
+        "image": "uploads\/1752893473_art_687788085e5430.31865187.jpg",
+        "time": "2025-07-04T10:50",
+        "notes": "没得说",
+        "weather": "多云",
+        "temperature": "30°C",
+        "collected": true,
+        "photos": [],
+        "collector": {
+            "name": "大猫",
+            "link": "http:\/\/www.youtube.com",
+            "level": "Lv.3",
+            "position": ""
+        },
+        "collector_coordinates": [
+            "33.123751",
+            "106.083984"
         ]
     }
 ]
